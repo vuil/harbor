@@ -325,6 +325,12 @@
 			"revisionTime": "2016-08-01T17:00:46Z"
 		},
 		{
+			"checksumSHA1": "L6Ps004WGoAJBEBX5Zrv0tPa2b4=",
+			"path": "github.com/manveru/faker",
+			"revision": "717f7cf83fb78669bfab612749c2e8ff63d5be11",
+			"revisionTime": "2016-04-19T07:20:36Z"
+		},
+		{
 			"checksumSHA1": "ToGxRLachRwa1HbVy7ZBdJaq5Zc=",
 			"path": "github.com/mattn/go-sqlite3",
 			"revision": "3fb7a0e792edd47bf0cf1e919dfc14e2be412e15",
