@@ -50,7 +50,7 @@ def get_secret_key(path):
         return key
     if not os.path.isdir(path):
         os.makedirs(path, mode=0600)
-    key = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))  
+    key = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))
     with open(key_file, 'w') as f:
         f.write(key)
         print("generated and saved secret key")
@@ -145,9 +145,10 @@ if rcp.has_option("configuration", "admiral_url"):
 else:
     admiral_url = ""
 secret_key = get_secret_key(secretkey_path)
+harbor_db=rcp.get("configuration", "harbor_db")
 ########
 
-ui_secret = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))  
+ui_secret = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))
 jobservice_secret = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))  
 
 adminserver_config_dir = os.path.join(config_dir,"adminserver")
@@ -169,7 +170,7 @@ registry_conf = os.path.join(config_dir, "registry", "config.yml")
 db_conf_env = os.path.join(config_dir, "db", "env")
 job_conf_env = os.path.join(config_dir, "jobservice", "env")
 nginx_conf = os.path.join(config_dir, "nginx", "nginx.conf")
-cert_dir = os.path.join(config_dir, "nginx", "cert") 
+cert_dir = os.path.join(config_dir, "nginx", "cert")
 
 if protocol == "https":
     target_cert_path = os.path.join(cert_dir, os.path.basename(cert_path))
@@ -192,7 +193,7 @@ render(os.path.join(templates_dir, "adminserver", "env"),
         auth_mode=auth_mode,
         self_registration=self_registration,
         ldap_url=ldap_url,
-        ldap_searchdn =ldap_searchdn, 
+        ldap_searchdn =ldap_searchdn,
         ldap_search_pwd =ldap_search_pwd,
         ldap_basedn=ldap_basedn,
         ldap_filter=ldap_filter,
@@ -220,7 +221,8 @@ render(os.path.join(templates_dir, "adminserver", "env"),
 	)
 
 render(os.path.join(templates_dir, "ui", "env"), 
-        ui_conf_env, 
+        ui_conf_env,
+	harbor_db=harbor_db,
         ui_secret=ui_secret,
         jobservice_secret=jobservice_secret,)
 
