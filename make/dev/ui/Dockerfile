@@ -2,6 +2,12 @@ FROM golang:1.7.3
 
 MAINTAINER jiangd@vmware.com
 
+ADD make/common/db/registry_sqlite.sql /tmp/r.sql
+RUN apt-get update && \
+    apt-get install -y sqlite3 libsqlite3-dev
+WORKDIR /tmp
+RUN cat r.sql | sqlite3 database.db
+
 COPY src/. /go/src/github.com/vmware/harbor/src
 WORKDIR /go/src/github.com/vmware/harbor/src/ui
 
@@ -25,4 +31,3 @@ WORKDIR /go/bin/
 ENTRYPOINT ["/go/bin/harbor_ui"]
 
 EXPOSE 80
-
