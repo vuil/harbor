@@ -102,6 +102,13 @@ else:
 ldap_uid = rcp.get("configuration", "ldap_uid")
 ldap_scope = rcp.get("configuration", "ldap_scope")
 ldap_connect_timeout = rcp.get("configuration", "ldap_connect_timeout")
+lw_domainname = rcp.get("configuration", "lw_domainname")
+lw_endpoint = rcp.get("configuration", "lw_endpoint")
+lw_admin_user = rcp.get("configuration", "lw_admin_user")
+lw_admin_password = rcp.get("configuration", "lw_admin_password")
+lw_ignore_certificates = rcp.get("configuration", "lw_ignore_certificates")
+lw_vmdirpath = rcp.get("configuration", "lw_vmdirpath")
+lw_scopes = rcp.get("configuration", "lw_scopes")
 db_password = rcp.get("configuration", "db_password")
 self_registration = rcp.get("configuration", "self_registration")
 use_compressed_js = rcp.get("configuration", "use_compressed_js")
@@ -203,6 +210,13 @@ render(os.path.join(templates_dir, "ui", "env"),
         ldap_uid=ldap_uid,
         ldap_scope=ldap_scope,
         ldap_connect_timeout=ldap_connect_timeout,
+        lw_domainname=lw_domainname,
+        lw_endpoint=lw_endpoint,
+        lw_ignore_certificates=lw_ignore_certificates,
+        lw_admin_user=lw_admin_user,
+        lw_admin_password=lw_admin_password,
+        lw_scopes=lw_scopes,
+        lw_vmdirpath=lw_vmdirpath,
 	self_registration=self_registration,
 	use_compressed_js=use_compressed_js,
         ui_secret=ui_secret,

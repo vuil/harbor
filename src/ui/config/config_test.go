@@ -31,6 +31,17 @@ var (
 		"2",
 		"5",
 	}
+
+	lw = LightwaveSetting{
+		"vphsere.local",
+		"https://test.lw.com",
+		"Administrator",
+		"Changeme",
+		false,
+		"",
+		"",
+	}
+
 	tokenExp                   = "3"
 	tokenExpRes                = 3
 	adminPassword              = "password"
@@ -64,6 +75,12 @@ func TestMain(m *testing.M) {
 	os.Setenv("REGISTRY_URL", internalRegistryURL)
 	os.Setenv("JOB_SERVICE_URL", jobServiceURL)
 
+	os.Setenv("LW_DOMAINNAME", lw.DomainName)
+	os.Setenv("LW_ENDPOINT", lw.Endpoint)
+	os.Setenv("LW_ADMIN_USER", lw.AdminUser)
+	os.Setenv("LW_ADMIN_PASSWORD", lw.AdminPassword)
+	os.Setenv("LW_IGNORE_CERTIFICATES", "")
+
 	err := Reload()
 	if err != nil {
 		panic(err)
@@ -88,6 +105,11 @@ func TestMain(m *testing.M) {
 	os.Unsetenv("CREATE_PROJECT_RESTRICTION")
 	os.Unsetenv("REGISTRY_URL")
 	os.Unsetenv("JOB_SERVICE_URL")
+	os.Unsetenv("LW_DOMAINNAME")
+	os.Unsetenv("LW_ENDPOINT")
+	os.Unsetenv("LW_ADMIN_USER")
+	os.Unsetenv("LW_ADMIN_PASSWORD")
+	os.Unsetenv("LW_IGNORE_CERTIFICATES")
 
 	os.Exit(rc)
 }
@@ -98,6 +120,19 @@ func TestAuth(t *testing.T) {
 	}
 	if LDAP() != ldap {
 		t.Errorf("Expected ldap setting: %+v, in fact: %+v", ldap, LDAP())
+	}
+}
+
+func TestLightwaveAuth(t *testing.T) {
+	mode := os.Getenv("AUTH_MODE")
+	os.Setenv("AUTH_MODE", "lw_auth")
+	defer os.Setenv("AUTH_MODE", mode)
+	err := Reload()
+	if err != nil {
+		panic(err)
+	}
+	if LW() != lw {
+		t.Errorf("Expected lightwave setting: %+v, in fact: %+v", lw, LW())
 	}
 }
 

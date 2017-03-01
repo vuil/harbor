@@ -36,11 +36,39 @@ type LDAPSetting struct {
 	ConnectTimeout string
 }
 
+// LightwaveSetting wraps the settings for connection to a Lightwave server
+type LightwaveSetting struct {
+	DomainName         string
+	Endpoint           string
+	AdminUser          string
+	AdminPassword      string
+	IgnoreCertificates bool
+	VmdirPath          string
+	Scopes             string
+}
+
 type uiParser struct{}
 
 // Parse parses the auth settings url settings and other configuration consumed by code under src/ui
 func (up *uiParser) Parse(raw map[string]string, config map[string]interface{}) error {
 	mode := raw["AUTH_MODE"]
+
+	if mode == "lw_auth" {
+		var ignoreCerts = false
+		b, err := strconv.ParseBool(raw["LW_IGNORE_CERTIFICATES"])
+		if err == nil {
+			ignoreCerts = b
+		}
+		setting := LightwaveSetting{
+			DomainName:         raw["LW_DOMAINNAME"],
+			Endpoint:           strings.TrimRight(raw["LW_ENDPOINT"], "/"),
+			AdminUser:          raw["LW_ADMIN_USER"],
+			AdminPassword:      raw["LW_ADMIN_PASSWORD"],
+			IgnoreCertificates: ignoreCerts,
+		}
+		config["lw"] = setting
+	}
+
 	if mode == "ldap_auth" {
 		setting := LDAPSetting{
 			URL:            raw["LDAP_URL"],
@@ -85,7 +113,11 @@ func (up *uiParser) Parse(raw map[string]string, config map[string]interface{}) 
 var uiConfig *commonConfig.Config
 
 func init() {
-	uiKeys := []string{"AUTH_MODE", "LDAP_URL", "LDAP_BASE_DN", "LDAP_SEARCH_DN", "LDAP_SEARCH_PWD", "LDAP_UID", "LDAP_FILTER", "LDAP_SCOPE", "LDAP_CONNECT_TIMEOUT", "TOKEN_EXPIRATION", "HARBOR_ADMIN_PASSWORD", "EXT_REG_URL", "UI_SECRET", "SECRET_KEY", "SELF_REGISTRATION", "PROJECT_CREATION_RESTRICTION", "REGISTRY_URL", "JOB_SERVICE_URL"}
+	uiKeys := []string{"AUTH_MODE", "TOKEN_EXPIRATION", "HARBOR_ADMIN_PASSWORD", "EXT_REG_URL",
+		"LDAP_URL", "LDAP_BASE_DN", "LDAP_SEARCH_DN", "LDAP_SEARCH_PWD", "LDAP_UID",
+		"LW_DOMAINNAME", "LW_ENDPOINT", "LW_ADMIN_USER", "LW_ADMIN_PASSWORD", "LW_IGNORE_CERTIFICATES",
+		"LDAP_FILTER", "LDAP_SCOPE", "LDAP_CONNECT_TIMEOUT", "PROJECT_CREATION_RESTRICTION",
+		"UI_SECRET", "SECRET_KEY", "SELF_REGISTRATION", "REGISTRY_URL", "JOB_SERVICE_URL"}
 	uiConfig = &commonConfig.Config{
 		Config: make(map[string]interface{}),
 		Loader: &commonConfig.EnvConfigLoader{Keys: uiKeys},
@@ -109,6 +141,11 @@ func AuthMode() string {
 // LDAP returns the setting of ldap server
 func LDAP() LDAPSetting {
 	return uiConfig.Config["ldap"].(LDAPSetting)
+}
+
+// LW returns the setting of connecting to Lightwave server
+func LW() LightwaveSetting {
+	return uiConfig.Config["lw"].(LightwaveSetting)
 }
 
 // TokenExpiration returns the token expiration time (in minute)
