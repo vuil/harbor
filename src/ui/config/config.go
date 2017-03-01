@@ -126,6 +126,25 @@ func LDAP() (*models.LDAP, error) {
 	return ldap, nil
 }
 
+// LW returns the setting of connecting to Lightwave server
+func LW() (*models.LightwaveSetting, error) {
+	cfg, err := mg.Get()
+	if err != nil {
+		return nil, err
+	}
+
+	lw := &models.LightwaveSetting{}
+	lw.DomainName = cfg[common.LightwaveDomainName].(string)
+	lw.Endpoint = cfg[common.LightwaveEndpoint].(string)
+	lw.AdminUser = cfg[common.LightwaveAdminUser].(string)
+	lw.AdminPassword = cfg[common.LightwaveAdminPassword].(string)
+	lw.IgnoreCertificates = cfg[common.LightwaveIgnoreCerts].(bool)
+	lw.VmdirPath = cfg[common.LightwaveVmdirPath].(string)
+	lw.Scopes = cfg[common.LightwaveScopes].(string)
+
+	return lw, nil
+}
+
 // TokenExpiration returns the token expiration time (in minute)
 func TokenExpiration() (int, error) {
 	cfg, err := mg.Get()

@@ -61,7 +61,7 @@ endif
 check_environment:
 	@$(MAKEPATH)/$(CHECKENVCMD)
 
-build: 
+build:
 	@echo "building adminserver container for photon..."
 	$(DOCKERBUILD) -f $(DOCKERFILEPATH_ADMINSERVER)/$(DOCKERFILENAME_ADMINSERVER) -t $(DOCKERIMAGENAME_ADMINSERVER):$(VERSIONTAG) .
 	@echo "Done."

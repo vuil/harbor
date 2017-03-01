@@ -128,6 +128,13 @@ else:
 ldap_uid = rcp.get("configuration", "ldap_uid")
 ldap_scope = rcp.get("configuration", "ldap_scope")
 ldap_timeout = rcp.get("configuration", "ldap_timeout")
+lw_domainname = rcp.get("configuration", "lw_domainname")
+lw_endpoint = rcp.get("configuration", "lw_endpoint")
+lw_admin_user = rcp.get("configuration", "lw_admin_user")
+lw_admin_password = rcp.get("configuration", "lw_admin_password")
+lw_ignore_certificates = rcp.get("configuration", "lw_ignore_certificates")
+lw_vmdirpath = rcp.get("configuration", "lw_vmdirpath")
+lw_scopes = rcp.get("configuration", "lw_scopes")
 db_password = rcp.get("configuration", "db_password")
 self_registration = rcp.get("configuration", "self_registration")
 use_compressed_js = rcp.get("configuration", "use_compressed_js")
@@ -217,17 +224,23 @@ render(os.path.join(templates_dir, "adminserver", "env"),
         token_expiration=token_expiration,
         admiral_url=admiral_url,
         with_notary=args.notary_mode,
-        use_compressed_js=use_compressed_js
+        use_compressed_js=use_compressed_js,
+        lw_domainname=lw_domainname,
+        lw_endpoint=lw_endpoint,
+        lw_ignore_certificates=lw_ignore_certificates,
+        lw_admin_user=lw_admin_user,
+        lw_admin_password=lw_admin_password,
+        lw_scopes=lw_scopes,
+        lw_vmdirpath=lw_vmdirpath,
 	)
 
-render(os.path.join(templates_dir, "ui", "env"), 
+render(os.path.join(templates_dir, "ui", "env"),
         ui_conf_env,
-	harbor_db=harbor_db,
-        ui_secret=ui_secret,
+	    harbor_db=harbor_db,
+	    ui_secret=ui_secret,
         jobservice_secret=jobservice_secret,)
 
-render(os.path.join(templates_dir, "registry", 
-		"config.yml"),
+render(os.path.join(templates_dir, "registry", "config.yml"),
         registry_conf,
         ui_url=ui_url)
 

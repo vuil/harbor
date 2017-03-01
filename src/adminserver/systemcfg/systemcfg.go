@@ -45,6 +45,7 @@ var (
 		common.LDAPSearchPwd,
 		common.MySQLPassword,
 		common.AdminInitialPassword,
+		common.LightwaveAdminPassword,
 	}
 
 	// all configurations need read from environment variables
@@ -78,6 +79,16 @@ var (
 		common.LDAPTimeout: &parser{
 			env:   "LDAP_TIMEOUT",
 			parse: parseStringToInt,
+		},
+		common.LightwaveEndpoint:      "LW_ENDPOINT",
+		common.LightwaveDomainName:    "LW_DOMAINNAME",
+		common.LightwaveAdminUser:     "LW_ADMIN_USER",
+		common.LightwaveAdminPassword: "LW_ADMIN_PASSWORD",
+		common.LightwaveScopes:        "LW_SCOPES",
+		common.LightwaveVmdirPath:     "LW_VMDIRPATH",
+		common.LightwaveIgnoreCerts: &parser{
+			env:   "LW_IGNORE_CERTIFICATES",
+			parse: parseStringToBool,
 		},
 		common.EmailHost: "EMAIL_HOST",
 		common.EmailPort: &parser{

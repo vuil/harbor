@@ -18,6 +18,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/vmware/harbor/src/common/models"
 	"github.com/vmware/harbor/src/common/utils/test"
 )
 
@@ -27,6 +28,17 @@ func TestConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create a mock admin server: %v", err)
 	}
+
+	lw := models.LightwaveSetting{
+		"vphsere.local",
+		"https://test.lw.com",
+		"Administrator",
+		"Changeme",
+		false,
+		"",
+		"",
+	}
+
 	defer server.Close()
 
 	if err := os.Setenv("ADMIN_SERVER_URL", server.URL); err != nil {
@@ -40,6 +52,12 @@ func TestConfig(t *testing.T) {
 		return
 	}
 	defer os.Remove(secretKeyPath)
+
+	os.Setenv("LW_DOMAINNAME", lw.DomainName)
+	os.Setenv("LW_ENDPOINT", lw.Endpoint)
+	os.Setenv("LW_ADMIN_USER", lw.AdminUser)
+	os.Setenv("LW_ADMIN_PASSWORD", lw.AdminPassword)
+	os.Setenv("LW_IGNORE_CERTIFICATES", "")
 
 	if err := os.Setenv("KEY_PATH", secretKeyPath); err != nil {
 		t.Fatalf("failed to set env %s: %v", "KEY_PATH", err)
@@ -72,6 +90,11 @@ func TestConfig(t *testing.T) {
 	if _, err := LDAP(); err != nil {
 		t.Fatalf("failed to get ldap settings: %v", err)
 	}
+	os.Unsetenv("LW_DOMAINNAME")
+	os.Unsetenv("LW_ENDPOINT")
+	os.Unsetenv("LW_ADMIN_USER")
+	os.Unsetenv("LW_ADMIN_PASSWORD")
+	os.Unsetenv("LW_IGNORE_CERTIFICATES")
 
 	if _, err := TokenExpiration(); err != nil {
 		t.Fatalf("failed to get token expiration: %v", err)
@@ -83,6 +106,20 @@ func TestConfig(t *testing.T) {
 
 	if _, err := SecretKey(); err != nil {
 		t.Fatalf("failed to get secret key: %v", err)
+	}
+}
+
+func TestLightwaveAuth(t *testing.T) {
+	mode := os.Getenv("AUTH_MODE")
+	os.Setenv("AUTH_MODE", "lw_auth")
+	defer os.Setenv("AUTH_MODE", mode)
+	err := Reload()
+	if err != nil {
+		panic(err)
+	}
+	lwSetting, _ := LW()
+	if lwSetting != lw {
+		t.Errorf("Expected lightwave setting: %+v, in fact: %+v", lw, lwSetting)
 	}
 
 	if _, err := SelfRegistration(); err != nil {

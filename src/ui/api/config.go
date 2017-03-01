@@ -48,6 +48,13 @@ var (
 		common.LDAPFilter,
 		common.LDAPScope,
 		common.LDAPTimeout,
+		common.LightwaveEndpoint,
+		common.LightwaveDomainName,
+		common.LightwaveIgnoreCerts,
+		common.LightwaveAdminUser,
+		common.LightwaveAdminPassword,
+		common.LightwaveScopes,
+		common.LightwaveVmdirPath,
 		common.TokenServiceURL,
 		common.RegistryURL,
 		common.EmailHost,
@@ -82,6 +89,7 @@ var (
 		common.SelfRegistration,
 		common.VerifyRemoteCert,
 		common.UseCompressedJS,
+		common.LightwaveIgnoreCerts,
 	}
 
 	passwordKeys = []string{
@@ -89,6 +97,7 @@ var (
 		common.EmailPassword,
 		common.LDAPSearchPwd,
 		common.MySQLPassword,
+		common.LightwaveAdminPassword,
 	}
 )
 
@@ -214,8 +223,8 @@ func validateCfg(c map[string]string) (bool, error) {
 	}
 
 	if value, ok := c[common.AUTHMode]; ok {
-		if value != common.DBAuth && value != common.LDAPAuth {
-			return isSysErr, fmt.Errorf("invalid %s, shoud be %s or %s", common.AUTHMode, common.DBAuth, common.LDAPAuth)
+		if value != common.DBAuth && value != common.LDAPAuth && value != common.LWAuth {
+			return isSysErr, fmt.Errorf("invalid %s, shoud be %s, %s or %s", common.AUTHMode, common.DBAuth, common.LDAPAuth, common.LWAuth)
 		}
 		mode = value
 	}
@@ -268,6 +277,32 @@ func validateCfg(c map[string]string) (bool, error) {
 			common.LDAPScopeBase,
 			common.LDAPScopeOnelevel,
 			common.LDAPScopeSubtree)
+	}
+
+	if mode == common.LWAuth {
+		lw, err := config.LW()
+		if err != nil {
+			isSysErr = true
+			return isSysErr, err
+		}
+
+		if len(lw.DomainName) == 0 {
+			if _, ok := c[common.LightwaveDomainName]; !ok {
+				return isSysErr, fmt.Errorf("%s is missing", common.LightwaveDomainName)
+			}
+		}
+		if len(lw.Endpoint) == 0 {
+			if _, ok := c[common.LightwaveEndpoint]; !ok {
+				return isSysErr, fmt.Errorf("%s is missing", common.LightwaveEndpoint)
+			}
+		}
+	}
+
+	if lwEndpoint, ok := c[common.LightwaveEndpoint]; ok && len(lwEndpoint) == 0 {
+		return isSysErr, fmt.Errorf("%s is empty", common.LightwaveEndpoint)
+	}
+	if lwDomain, ok := c[common.LightwaveDomainName]; ok && len(lwDomain) == 0 {
+		return isSysErr, fmt.Errorf("%s is empty", common.LightwaveDomainName)
 	}
 
 	for _, k := range boolKeys {
