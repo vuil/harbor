@@ -17,6 +17,16 @@ make                  | 3.81 +
 golang*               | 1.6.0 +
  *optional
 
+When developing on OSX, use gnu-sed as a replacement for sed provided by the OS
+because the latter inteprets certain command-line arguments differently from the *nix version.
+gnu-sed can be installed using brew as follows:
+
+   ```sh
+      > brew install gnu-sed --with-default-names
+
+      > which sed
+      /usr/local/bin/sed
+   ```
 
 ## Step 2: Getting the source code
 
