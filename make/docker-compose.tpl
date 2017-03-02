@@ -73,14 +73,18 @@ services:
        /usr/local/bin/etcd
        -name etcd0
        -advertise-client-urls http://${HOSTIP}:2379,http://${HOSTIP}:4001
-       -listen-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001
+       -listen-client-urls http://${HOSTIP}:2379,http://${HOSTIP}:4001
        -initial-advertise-peer-urls http://${HOSTIP}:2380
        -listen-peer-urls http://0.0.0.0:2380
+       -data-dir /etcd
        -initial-cluster-token etcd-cluster-1
        -initial-cluster etcd0=http://${HOSTIP}:2380
        -initial-cluster-state new
+    networks:
+      - harbor
     volumes:
       - /data/certs/:/etc/ssl/certs
+      - /data/etcd/etcd0/:/etcd
     ports:
      - "2380:2380"
      - "2379:2379"
