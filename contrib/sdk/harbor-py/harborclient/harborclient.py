@@ -109,7 +109,7 @@ class HarborClient(object):
         result = False
         path = '%s://%s/api/projects' % (self.protocol, self.host)
         request_body = json.dumps({'project_name': project_name,
-                                   'public': is_public})
+                                   'public': 1 if is_public else 0})
         response = requests.post(path,
                                  cookies={'beegosessionID': self.session_id},
                                  data=request_body)
@@ -130,7 +130,7 @@ class HarborClient(object):
         result = False
         path = '%s://%s/api/projects/%s/publicity?project_id=%s' % (
             self.protocol, self.host, project_id, project_id)
-        request_body = json.dumps({'public': is_public})
+        request_body = json.dumps({'public': 1 if is_public else 0})
         response = requests.put(path,
                                 cookies={'beegosessionID': self.session_id},
                                 data=request_body)
