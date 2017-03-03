@@ -156,6 +156,7 @@ else
 endif
 
 SEDCMD=$(shell which sed)
+UNAME=$(shell uname)
 
 # package 
 TARCMD=$(shell which tar)
@@ -223,6 +224,9 @@ modify_composefile:
 	@echo "preparing docker-compose file..."
 	@cp $(DOCKERCOMPOSEFILEPATH)/$(DOCKERCOMPOSETPLFILENAME) $(DOCKERCOMPOSEFILEPATH)/$(DOCKERCOMPOSEFILENAME)
 	@$(SEDCMD) -i 's/image\: vmware.*/&:$(VERSIONTAG)/g' $(DOCKERCOMPOSEFILEPATH)/$(DOCKERCOMPOSEFILENAME)
+	@if [ "$(UNAME)" = "Darwin" ] ; then \
+		$(SEDCMD) -i 's/\/var\/log\/harbor/\/private\/var\/log\/harbor/' $(DOCKERCOMPOSEFILEPATH)/$(DOCKERCOMPOSEFILENAME); \
+	fi
 	
 install: compile build prepare modify_composefile
 	@echo "loading harbor images..."
