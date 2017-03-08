@@ -30,6 +30,11 @@ type Client struct {
 	domainName string
 }
 
+// GetHTTPClient returns the http Client used for making HTTP requests
+func (c *Client) GetHTTPClient() *http.Client {
+	return c.httpClient
+}
+
 func getVmdirUserPath(c *oidc.Config) string {
 	return GetVmdirBasePath() + c.DomainName + baseVmdirPathUserSuffix
 }
@@ -80,6 +85,7 @@ func StaticCheckResponse(response *http.Response, inErr error) oidc.ErrorRespons
 // NewClient returns a new lightwave OIDC Client
 func NewClient(options oidc.ConfigOptions) *Client {
 	config := InitOIDCConfig(options)
+	InitVmdirBasePath(config)
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -349,6 +355,37 @@ func (c *Client) AddUserToGroup(
 	return response
 }
 
+// CreateGroup creates a new lightwave group
+func (c *Client) CreateGroup(
+	groupName string, description string,
+	token oidc.TokenResponse) oidc.Response {
+
+	lwGroup := &RestGroup{
+		Name:   groupName,
+		Domain: c.domainName,
+		Details: &RestGroupDetails{
+			Description: description,
+		},
+	}
+
+	url := c.buildPostGroupURL()
+
+	response := c.performRequest("POST", url, lwGroup, token)
+
+	if response.GetError() != nil {
+		e := response.GetError()
+		log.Info(fmt.Sprintf("CreateGroup error: %s", e))
+	}
+
+	if response.GetErrorResponse() != nil {
+		e := response.GetErrorResponse()
+		log.Info(fmt.Sprintf("CreateGroup OidcErrorResponse: %d, %s",
+			e.GetStatusCode(), e.GetFullMessage()))
+	}
+
+	return response
+}
+
 // ListUser enumerate all users
 func (c *Client) ListUser(authorization string) oidc.Response {
 	log.Debug(fmt.Sprintf("List all OIDC user"))
@@ -539,6 +576,10 @@ func (c *Client) buildBaseURL(path string) string {
 
 func (c *Client) buildPostUserURL() string {
 	return c.buildBaseURL(c.GetVmdirUserPath())
+}
+
+func (c *Client) buildPostGroupURL() string {
+	return c.buildBaseURL(c.GetVmdirGroupPath())
 }
 
 func (c *Client) buildDeleteUserURL(userID string) string {
