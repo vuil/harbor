@@ -331,6 +331,12 @@
 			"revisionTime": "2016-09-07T16:20:43Z"
 		},
 		{
+			"checksumSHA1": "PAt6E67HidW2sb3zG9bc5Vy1hEg=",
+			"path": "github.com/mendsley/gojwk",
+			"revision": "4d5ec6e58103388d6cb0d7d72bc72649be4f0504",
+			"revisionTime": "2014-12-17T21:40:56Z"
+		},
+		{
 			"checksumSHA1": "CoxdaTYdPZNJXr8mJfLxye428N0=",
 			"path": "github.com/ugorji/go/codec",
 			"revision": "c88ee250d0221a57af388746f5cf03768c21d6e2",
