@@ -111,7 +111,7 @@ func verifyProjectsForUser(user models.User, projects []models.Project, dataGen 
     var msg = ""
     for i:=0; i<len(projectImages) && isEqual; i++ {
         projReq := projectImages[i].ProjectReq
-        //TODO: Remove the comapred project from the projects[]
+        //TODO: Remove the compared project from the projects[]
         for j:=0; j<len(projects); j++ {
             if projReq.ProjectName == projects[j].Name {
                 isEqual = CompareProjects(projects[j], projReq, user)

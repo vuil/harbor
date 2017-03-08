@@ -2,9 +2,11 @@ package main
 
 import(
     "fmt"
+
     "github.com/vmware/harbor/src/common/models"
 )
 
+// CompareUsers deep compares the two users
 func CompareUsers(u1, u2 models.User) bool {
     if &u1 == nil && &u2 == nil { return true }
     if &u1 == nil || &u2 == nil { return false }
@@ -17,6 +19,7 @@ func CompareUsers(u1, u2 models.User) bool {
     return isEqual
 }
 
+// CompareProjects deep compares the two projects
 func CompareProjects(p1 models.Project, p2 ProjectReq, user models.User) bool {
     if &p1 == nil { return false }
 
@@ -27,6 +30,7 @@ func CompareProjects(p1 models.Project, p2 ProjectReq, user models.User) bool {
     return isEqual
 }
 
+// CompareRepos deep compares the two repositories
 func CompareRepos(projectName string, imgVersion ImageVersion, repositories []string) bool {
     var isEqual = false
     repoName := fmt.Sprintf("%s/%s", projectName, imgVersion.ImageName)

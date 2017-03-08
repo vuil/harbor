@@ -2,7 +2,6 @@
 package main
 
 import (
-        //"fmt"
         "math/rand"
         "time"
 
@@ -72,16 +71,10 @@ func (d DataGen) GetAllProjects() []ProjectImage {
     return projectImages
 }
 
+// GetProjects returns the set of Projects associated with that username
 func (d DataGen) GetProjects(username string) []ProjectImage {
     return d.UserProjectMapping[username]
 }
-
-// func (d DataGen) GetProject(projectName string) (ProjectReq, models.User) {
-//     for i := 0; i < len(d.Users); i++ {
-//         var user = d.Users[i]
-//
-//     }
-// }
 
 func (d DataGen) addProject2User(username string, project ProjectImage) {
     projects, _ := d.UserProjectMapping[username]
@@ -121,7 +114,6 @@ func _randInt(min, max int) int {
 
 func _genProjectName() string {
     faker := getInstance()
-    //var name = faker.Words(1, false)[0]
     var name = faker.Characters(_randInt(5, 20))
     return name
 }

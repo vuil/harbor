@@ -186,31 +186,15 @@ func GetCurrentUser(sessionID string) models.User {
 }
 
 // SearchForProjects fetches a list of projects matching the search key supplied
-func SearchForProjects(sessionID string, searchKey string) []Search{
-    cookie := http.Cookie{Name: "beegosessionID", Value: sessionID}
+func SearchForProjects(sessionID string, searchKey string) []Search {
+    var queryParams = map[string]string{
+        "q": searchKey,
+    }
 
-    u, _ := url.ParseRequestURI(baseURL)
-    u.Path = "/api/search"
-    urlStr := fmt.Sprintf("%v", u)
-    client := &http.Client{}
-
-    r, _ := http.NewRequest("GET", urlStr, nil)
-
-    query := r.URL.Query()
-    query.Add("q", searchKey)
-    r.URL.RawQuery = query.Encode()
-
-    r.Header.Add("Content-Type", "application/json")
-    r.AddCookie(&cookie)
-
-    resp, _ := client.Do(r)
-    fmt.Println(resp)
-
-    body, err := ioutil.ReadAll(resp.Body)
+    body, err := getResult(baseURL, "/api/search", sessionID, queryParams)
     if err != nil {
        panic(err.Error())
     }
-    defer resp.Body.Close()
     var searchedProjects = new([]Search)
     json.Unmarshal([]byte(body), &searchedProjects)
     return *searchedProjects
