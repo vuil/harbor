@@ -1,0 +1,14 @@
+#!/bin/bash
+
+USERNAME=$1
+PASSWORD=$2
+HARBOR_URL=$3
+PORT=$4
+REPO=$5
+IMG_NAME=$6
+TAG=$7
+
+docker pull $IMG_NAME
+docker login -u $USERNAME -p $PASSWORD $HARBOR_URL:$PORT
+docker tag $IMG_NAME $HARBOR_URL:$PORT/$REPO/$IMG_NAME:$TAG
+docker push $HARBOR_URL:$PORT/$REPO/$IMG_NAME:$TAG
