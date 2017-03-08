@@ -46,6 +46,25 @@ type RestUserDetails struct {
 	Description string `json:"description"`
 }
 
+// RestGroupDetails struct
+type RestGroupDetails struct {
+	Description string `json:"description"`
+}
+
+// RestPrincipal struct
+type RestPrincipal struct {
+	Name   string `json:"name"`
+	Domain string `json:"domain"`
+}
+
+// RestGroup struct
+type RestGroup struct {
+	Name      string            `json:"name"`
+	Domain    string            `json:"domain"`
+	Details   *RestGroupDetails `json:"details,omitempty"`
+	Principal *RestPrincipal    `json:"alias,omitempty"`
+}
+
 // RestPasswordDetails struct
 type RestPasswordDetails struct {
 	Password *string `json:"password,omitempty"`
