@@ -19,7 +19,7 @@ if sys.version_info[:3][0] == 3:
     import configparser as ConfigParser
     import io as StringIO
 
-def validate(conf): 
+def validate(conf):
     protocol = rcp.get("configuration", "ui_url_protocol")
     if protocol == "https":
         if not rcp.has_option("configuration", "ssl_cert"):
@@ -48,7 +48,7 @@ def get_secret_key(path):
         return key
     if not os.path.isdir(path):
         os.makedirs(path, mode=0600)
-    key = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))  
+    key = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))
     with open(key_file, 'w') as f:
         f.write(key)
         print("generated and saved secret key")
@@ -57,7 +57,7 @@ def get_secret_key(path):
 base_dir = os.path.dirname(__file__)
 config_dir = os.path.join(base_dir, "common/config")
 templates_dir = os.path.join(base_dir, "common/templates")
-    
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-conf', dest='cfgfile', default=base_dir+'/harbor.cfg',type=str,help="the path of Harbor configuration file")
 
@@ -129,9 +129,10 @@ verify_remote_cert = rcp.get("configuration", "verify_remote_cert")
 proj_cre_restriction = rcp.get("configuration", "project_creation_restriction")
 secretkey_path = rcp.get("configuration", "secretkey_path")
 secret_key = get_secret_key(secretkey_path)
+harbor_db=rcp.get("configuration", "harbor_db")
 ########
 
-ui_secret = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))  
+ui_secret = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))
 
 ui_config_dir = os.path.join(config_dir,"ui")
 if not os.path.exists(ui_config_dir):
@@ -166,7 +167,7 @@ registry_conf = os.path.join(config_dir, "registry", "config.yml")
 db_conf_env = os.path.join(config_dir, "db", "env")
 job_conf_env = os.path.join(config_dir, "jobservice", "env")
 nginx_conf = os.path.join(config_dir, "nginx", "nginx.conf")
-cert_dir = os.path.join(config_dir, "nginx", "cert") 
+cert_dir = os.path.join(config_dir, "nginx", "cert")
 def delfile(src):
     if os.path.isfile(src):
         try:
@@ -197,13 +198,14 @@ else:
 
 render(os.path.join(templates_dir, "ui", "env"),
         ui_conf_env,
+        harbor_db=harbor_db,
         hostname=hostname,
         db_password=db_password,
         ui_url=ui_url,
         auth_mode=auth_mode,
         harbor_admin_password=harbor_admin_password,
         ldap_url=ldap_url,
-        ldap_searchdn =ldap_searchdn, 
+        ldap_searchdn =ldap_searchdn,
         ldap_search_pwd =ldap_search_pwd,
         ldap_basedn=ldap_basedn,
         ldap_filter=ldap_filter,
@@ -217,13 +219,13 @@ render(os.path.join(templates_dir, "ui", "env"),
         lw_admin_password=lw_admin_password,
         lw_scopes=lw_scopes,
         lw_vmdirpath=lw_vmdirpath,
-	self_registration=self_registration,
-	use_compressed_js=use_compressed_js,
+        self_registration=self_registration,
+        use_compressed_js=use_compressed_js,
         ui_secret=ui_secret,
         secret_key=secret_key,
-	verify_remote_cert=verify_remote_cert,
+        verify_remote_cert=verify_remote_cert,
         project_creation_restriction=proj_cre_restriction,
-	token_expiration=token_expiration)
+        token_expiration=token_expiration)
 
 render(os.path.join(templates_dir, "ui", "app.conf"),
         ui_conf,
@@ -252,7 +254,7 @@ render(os.path.join(templates_dir, "jobservice", "env"),
         secret_key=secret_key,
         ui_url=ui_url,
         verify_remote_cert=verify_remote_cert)
-		
+
 print("Generated configuration file: %s" % jobservice_conf)
 shutil.copyfile(os.path.join(templates_dir, "jobservice", "app.conf"), jobservice_conf)
 
@@ -305,13 +307,12 @@ if customize_crt == 'on':
 
         check_private_key_stat(path=private_key_pem)
         check_certificate_stat(path=root_crt)
-		
+
 else:
     print("Generated configuration file: %s" % ui_config_dir + "private_key.pem")
     shutil.copyfile(os.path.join(templates_dir, "ui", "private_key.pem"), os.path.join(ui_config_dir, "private_key.pem"))
     print("Generated configuration file: %s" % registry_config_dir + "root.crt")
     shutil.copyfile(os.path.join(templates_dir, "registry", "root.crt"), os.path.join(registry_config_dir, "root.crt"))
-	
+
 FNULL.close()
 print("The configuration files are ready, please use docker-compose to start the service.")
-

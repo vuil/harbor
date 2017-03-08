@@ -1,7 +1,9 @@
+DATABASE=$harbor_db
 MYSQL_HOST=mysql
 MYSQL_PORT=3306
 MYSQL_USR=root
 MYSQL_PWD=$db_password
+SQLITE_FILE=/tmp/database.db
 REGISTRY_URL=http://registry:5000
 JOB_SERVICE_URL=http://jobservice
 UI_URL=http://ui

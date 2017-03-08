@@ -23,7 +23,7 @@ services:
       - log
     logging:
       driver: "syslog"
-      options:  
+      options:
         syslog-address: "tcp://127.0.0.1:1514"
         tag: "registry"
   mysql:
@@ -37,7 +37,7 @@ services:
       - log
     logging:
       driver: "syslog"
-      options:  
+      options:
         syslog-address: "tcp://127.0.0.1:1514"
         tag: "mysql"
   ui:
@@ -54,7 +54,7 @@ services:
       - log
     logging:
       driver: "syslog"
-      options:  
+      options:
         syslog-address: "tcp://127.0.0.1:1514"
         tag: "ui"
   jobservice:
@@ -71,7 +71,7 @@ services:
       - ui
     logging:
       driver: "syslog"
-      options:  
+      options:
         syslog-address: "tcp://127.0.0.1:1514"
         tag: "jobservice"
   proxy:
@@ -89,6 +89,6 @@ services:
       - log
     logging:
       driver: "syslog"
-      options:  
+      options:
         syslog-address: "tcp://127.0.0.1:1514"
         tag: "proxy"

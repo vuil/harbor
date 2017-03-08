@@ -11,7 +11,7 @@ Project Harbor is an enterprise-class registry server that stores and distribute
 * **Role based access control**: Users and repositories are organized via 'projects' and a user can have different permission for images under a project.
 * **Policy based image replication**: Images can be replicated (synchronized) between multiple registry instances. Great for load balancing, high availability, multi-datacenter, hybrid and multi-cloud scenarios.
 * **LDAP/AD support**: Harbor integrates with existing enterprise LDAP/AD for user authentication and management.
-* **Image deletion & garbage collection**: Images can be deleted and their space can be recycled. 
+* **Image deletion & garbage collection**: Images can be deleted and their space can be recycled.
 * **Graphical user portal**: User can easily browse, search repositories and manage projects.
 * **Auditing**: All the operations to the repositories are tracked.
 * **RESTful API**: RESTful APIs for most administrative operations, easy to integrate with external systems.
@@ -23,7 +23,7 @@ Project Harbor is an enterprise-class registry server that stores and distribute
 
 **On a Linux host:** docker 1.10.0+ and docker-compose 1.6.0+ .
 
-**On vSphere:** vCenter 5.5+ for deployment of Harbor's virtual appliance. 
+**On vSphere:** vCenter 5.5+ for deployment of Harbor's virtual appliance.
 
 Download binaries of **[Harbor release ](https://github.com/vmware/harbor/releases)** and follow **[Installation & Configuration Guide](docs/installation_guide.md)** to install Harbor.
 
@@ -33,7 +33,7 @@ Refer to **[User Guide](docs/user_guide.md)** for more details on how to use Har
 **Slack:** Join Harbor's community here: [VMware {code}](https://code.vmware.com/join/), Channel: #harbor.  
 **Email:** harbor@ vmware.com .  
 **WeChat Group:** Add WeChat id *connect1688* to join WeChat discussion group.  
-More info on [partners and users](partners.md). 
+More info on [partners and users](partners.md).
 
 ### Contribution
 We welcome contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a pull request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq). Contact us for any questions: harbor @vmware.com .
@@ -47,3 +47,4 @@ This project uses open source components which have additional licensing terms. 
 * Docker Registry 2.5: [docker image](https://hub.docker.com/_/registry/), [license](https://github.com/docker/distribution/blob/master/LICENSE)
 * MySQL 5.6: [docker image](https://hub.docker.com/_/mysql/), [license](https://github.com/docker-library/mysql/blob/master/LICENSE)
 * NGINX 1.11.5: [docker image](https://hub.docker.com/_/nginx/), [license](https://github.com/nginxinc/docker-nginx/blob/master/LICENSE)
+* ETCD 3.1.0: [docker image](https://github.com/vuil/harbor), [license](https://github.com/coreos/etcd/blob/master/LICENSE)
