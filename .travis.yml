@@ -64,6 +64,7 @@ install:
   - sudo service docker restart
   - go get github.com/dghubble/sling
   - go get github.com/stretchr/testify
+  - go get gopkg.in/h2non/gock.v1
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
   

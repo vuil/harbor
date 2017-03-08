@@ -57,8 +57,8 @@ func GetOIDCClient() oidc.Client {
 	return client
 }
 
-// Login username : user name without the @<lw_domainName>
-func Login(client oidc.Client, username string, password string) (oidc.TokenResponse, oidc.ErrorResponse) {
+// login username is user name without the @<lw_domainName>
+func login(client oidc.Client, username string, password string) (oidc.TokenResponse, oidc.ErrorResponse) {
 	log.Debug("lw login for ", username)
 
 	domainName := config.LW().DomainName
@@ -69,6 +69,8 @@ func Login(client oidc.Client, username string, password string) (oidc.TokenResp
 		log.Info(fmt.Sprintf("GetTokenByPasswordGrant, User: %s  ,ErrorResponse: %d, %s", username,
 			errorResponse.GetStatusCode(), errorResponse.GetFullMessage()))
 	}
+	log.Debugf("Authenticated with token = %v\n", token)
+
 	return token, errorResponse
 }
 
@@ -82,11 +84,10 @@ func (l *Auth) Authenticate(m models.AuthModel) (*models.User, error) {
 
 	client := GetOIDCClient()
 
-	token, errResponse := Login(client, user, pass)
+	_, errResponse := login(client, user, pass)
 	if errResponse != nil {
 		return nil, errors.New(errResponse.GetFullMessage())
 	}
-	log.Debugf("Authenticated with token = %v\n", token)
 
 	u.Username = m.Principal
 	log.Debug("username:", u.Username)

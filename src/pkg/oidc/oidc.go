@@ -102,6 +102,7 @@ type Client interface {
 	UpdateUser(string, interface{}, TokenResponse) Response
 	DeleteUser(string, TokenResponse) Response
 	UpdatePassword(string, interface{}, TokenResponse) Response
+	CreateGroup(string, string, TokenResponse) Response
 	AddUserToGroup(string, string, TokenResponse) Response
 	ListUser(string) Response
 }
