@@ -69,6 +69,8 @@ install:
   - go get github.com/mattn/goveralls
   - go get github.com/kr/pretty
   - go get github.com/manveru/faker
+  - go get github.com/golang/mock/gomock
+  - go get github.com/golang/mock/mockgen
 
 before_script:
   # create tables and load data
@@ -87,12 +89,15 @@ script:
   - export REGISTRY_URL=$IP:5000
   - echo $REGISTRY_URL
   - ./tests/pushimage.sh
+  - go generate ./src/pkg/...
   - ./tests/coverage4gotest.sh
   - goveralls -coverprofile=profile.cov -service=travis-ci
 
   - docker-compose -f make/docker-compose.test.yml down
   - sudo rm -rf /data/database
   - sudo rm -rf /data/registry
+
+  - find src -name "*_mock.go" | xargs rm -f
 
   - docker-compose -f make/dev/docker-compose.yml build mysql
   - docker-compose -f make/dev/docker-compose.yml up -d

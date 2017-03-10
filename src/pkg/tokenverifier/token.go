@@ -5,6 +5,14 @@
 
 package tokenverifier
 
+//go:generate mockgen -source=token.go  -destination ./token_mock.go -package tokenverifier
+
+// TokenVerifier is the interface for verifying a lightwave token
+type TokenVerifier interface {
+	// Verify verifies a token and returns a JWTToken on success
+	Verify(token string) (*JWTToken, error)
+}
+
 // JWTToken this is for LW Access Token
 type JWTToken struct {
 	TokenID    string   `json:"jti"`

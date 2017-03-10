@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-//go:generate mockgen -source=oidc.go  -destination ../oidc_test/gen_mock_oidc.go -package oidc_test -imports .=github.com/vmware/harbor/src/pkg/oidc
+//go:generate mockgen -source=oidc.go  -destination ./oidc_mock.go -package oidc
 
 // Config oidc config struct
 type Config struct {
