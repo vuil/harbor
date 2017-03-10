@@ -163,6 +163,12 @@
 			"revisionTime": "2017-02-09T20:17:57Z"
 		},
 		{
+			"checksumSHA1": "2Fy1Y6Z3lRRX1891WF/+HT4XS2I=",
+			"path": "github.com/dgrijalva/jwt-go",
+			"revision": "2268707a8f0843315e2004ee4f1d021dc08baedf",
+			"revisionTime": "2017-02-01T22:58:49Z"
+		},
+		{
 			"checksumSHA1": "dyW7eJt0inBkevS8lV0eb0Pm6MA=",
 			"path": "github.com/docker/distribution",
 			"revision": "12acdf0a6c1e56d965ac6eb395d2bce687bf22fc",
