@@ -69,6 +69,8 @@ install:
   - go get github.com/mattn/goveralls
   - go get github.com/kr/pretty
   - go get github.com/manveru/faker
+  - go get github.com/golang/mock/gomock
+  - go get github.com/golang/mock/mockgen
 
 before_script:
   # create tables and load data
@@ -90,6 +92,7 @@ script:
   - export REGISTRY_URL=$IP:5000
   - echo $REGISTRY_URL
   - ./tests/pushimage.sh
+  - go generate ./src/pkg/...
   - cd tests
   - sudo ./ldapprepare.sh 
   - cd .. 
@@ -98,7 +101,10 @@ script:
   - goveralls -coverprofile=profile.cov -service=travis-ci
 
   - docker-compose -f make/docker-compose.test.yml down
-  - sudo rm -rf /data/config/*  
+  - find src -name "*_mock.go" | xargs rm -f
+  - sudo rm -rf /data/database
+  - sudo rm -rf /data/registry
+  - sudo rm -rf /data/config/* 
   - ls /data/cert
   - sudo make install GOBUILDIMAGE=golang:1.7.3 COMPILETAG=compile_golangimage CLARITYIMAGE=danieljt/harbor-clarity-base:0.8.4 NOTARYFLAG=true
   
