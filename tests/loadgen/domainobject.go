@@ -41,3 +41,12 @@ type ProjectReq struct {
 	// The public status of the project.
 	Public int32 `json:"public,omitempty"`
 }
+
+type MemberReq struct {
+
+	// The username of the user to be added as member
+	Username string `json:"username"`
+
+	// The role ids of the roles to be given to the member
+	Roles    []int  `json:"roles"`
+}

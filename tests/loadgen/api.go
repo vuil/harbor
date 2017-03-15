@@ -172,7 +172,7 @@ func ListRepos(baseURL, sessionID string, projectID int64) []string {
 }
 
 // GetCurrentUser returns the currently logged in user
-func GetCurrentUser(sessionID string) models.User {
+func GetCurrentUser(baseURL, sessionID string) models.User {
     cookie := http.Cookie{Name: "beegosessionID", Value: sessionID}
     resp := getJSON(baseURL, "/api/users/current", cookie)
     body, err := ioutil.ReadAll(resp.Body)
@@ -186,7 +186,7 @@ func GetCurrentUser(sessionID string) models.User {
 }
 
 // SearchForProjects fetches a list of projects matching the search key supplied
-func SearchForProjects(sessionID string, searchKey string) []Search {
+func SearchForProjects(baseURL, sessionID string, searchKey string) []Search {
     var queryParams = map[string]string{
         "q": searchKey,
     }
@@ -198,4 +198,26 @@ func SearchForProjects(sessionID string, searchKey string) []Search {
     var searchedProjects = new([]Search)
     json.Unmarshal([]byte(body), &searchedProjects)
     return *searchedProjects
+}
+
+func AddPermissionsForUser(sessionID string, projectId int64, memberReq MemberReq) (bool, int) {
+    var permissionAdded = false
+    cookie := http.Cookie{Name: "beegosessionID", Value: sessionID}
+    jsonData, err := json.Marshal(memberReq)
+    if err != nil {
+        panic(err)
+    }
+
+    // Append priject ID to URL
+    buf := new(bytes.Buffer)
+    buf.WriteString("/api/projects/")
+    buf.WriteString(strconv.FormatInt(projectId, 10))
+    buf.WriteString("/members/")
+
+    resp := postJSON(baseURL, buf.String(), jsonData, cookie)
+    if resp.StatusCode == 200 {
+        permissionAdded = true
+    }
+    defer resp.Body.Close()
+    return permissionAdded, resp.StatusCode
 }
