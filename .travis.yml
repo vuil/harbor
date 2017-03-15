@@ -2,31 +2,31 @@ sudo: true
 
 language: go
 
-go: 
+go:
   - 1.7.3
 
 go_import_path: github.com/vmware/harbor
 
-services: 
+services:
   - docker
 
 dist: trusty
 
 env:
   DB_HOST: 127.0.0.1
-  DB_PORT: 3306 
-  DB_USR: root 
+  DB_PORT: 3306
+  DB_USR: root
   DB_PWD: root123
   MYSQL_HOST: localhost
-  MYSQL_PORT: 3306 
-  MYSQL_USR: root 
+  MYSQL_PORT: 3306
+  MYSQL_USR: root
   MYSQL_PWD: root123
   DOCKER_COMPOSE_VERSION: 1.7.1
   HARBOR_ADMIN: admin
-  HARBOR_ADMIN_PASSWD: Harbor12345 
-  UI_SECRET: tempString  
+  HARBOR_ADMIN_PASSWD: Harbor12345
+  UI_SECRET: tempString
   MAX_JOB_WORKERS: 3
-  SECRET_KEY: 1234567890123456 
+  SECRET_KEY: 1234567890123456
   AUTH_MODE: db_auth
   SELF_REGISTRATION: "on"
 
@@ -34,8 +34,8 @@ before_install:
    - sudo ./tests/hostcfg.sh
    - sudo ./make/prepare
 
-install: 
-  - sudo apt-get update && sudo apt-get install -y libldap2-dev 
+install:
+  - sudo apt-get update && sudo apt-get install -y libldap2-dev
   - sudo apt-get install -y sqlite3
 #  - sudo apt-get remove -y mysql-common mysql-server-5.5 mysql-server-core-5.5 mysql-client-5.5 mysql-client-core-5.5
 #  - sudo apt-get autoremove -y
@@ -60,7 +60,7 @@ install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
   - IP=`ip addr s eth0 |grep "inet "|awk '{print $2}' |awk -F "/" '{print $1}'`
-  - sudo sed -i '$a DOCKER_OPTS=\"--insecure-registry '$IP':5000\"' /etc/default/docker
+  - sudo sed -i '$a DOCKER_OPTS=\"--insecure-registry '$IP':5000\ --insecure-registry '$IP':80\"' /etc/default/docker
   - sudo service docker restart
   - go get github.com/dghubble/sling
   - go get github.com/stretchr/testify
@@ -68,7 +68,8 @@ install:
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
   - go get github.com/kr/pretty
-  
+  - go get github.com/manveru/faker
+
 before_script:
   # create tables and load data
   # - mysql < ./make/db/registry.sql -uroot --verbose
@@ -78,24 +79,29 @@ script:
   - sudo mkdir -p /harbor_storage/ca_download
   - sudo mv ./tests/ca.crt /harbor_storage/ca_download
   - sudo service mysql stop
-  - sudo ./tests/testprepare.sh 
+  - sudo ./tests/testprepare.sh
   - docker-compose -f ./make/docker-compose.test.yml up -d
   - go list ./... | grep -v -E 'vendor|tests' | xargs -L1 fgt golint
   - go list ./... | grep -v -E 'vendor|tests' | xargs -L1 go vet
   - export MYSQL_HOST=$IP
   - export REGISTRY_URL=$IP:5000
   - echo $REGISTRY_URL
-  - ./tests/pushimage.sh 
+  - ./tests/pushimage.sh
   - ./tests/coverage4gotest.sh
   - goveralls -coverprofile=profile.cov -service=travis-ci
 
   - docker-compose -f make/docker-compose.test.yml down
-  
+  - sudo rm -rf /data/database
+  - sudo rm -rf /data/registry
+
+  - docker-compose -f make/dev/docker-compose.yml build mysql
   - docker-compose -f make/dev/docker-compose.yml up -d
-  
+
   - docker ps
   - go run tests/startuptest.go http://localhost/
   - go run tests/userlogintest.go -name ${HARBOR_ADMIN} -passwd ${HARBOR_ADMIN_PASSWD}
+  - cd ./tests/loadgen && go build
+  - ./loadgen -harbor_url http://$IP -users 2 -projects 5 -port 80
 
 #  - sudo ./tests/testprepare.sh
 #  - go test -v ./tests/apitests
