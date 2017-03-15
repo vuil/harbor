@@ -2,28 +2,28 @@ sudo: true
 
 language: go
 
-go: 
+go:
   - 1.7.3
 
 go_import_path: github.com/vmware/harbor
 
-services: 
+services:
   - docker
 
 dist: trusty
 
 env:
   MYSQL_HOST: localhost
-  MYSQL_PORT: 3306 
-  MYSQL_USR: root 
+  MYSQL_PORT: 3306
+  MYSQL_USR: root
   MYSQL_PWD: root123
   MYSQL_DATABASE: registry
   SQLITE_FILE: /tmp/registry.db
   ADMIN_SERVER_URL: http://127.0.0.1:8888
   DOCKER_COMPOSE_VERSION: 1.7.1
   HARBOR_ADMIN: admin
-  HARBOR_ADMIN_PASSWD: Harbor12345 
-  UI_SECRET: tempString  
+  HARBOR_ADMIN_PASSWD: Harbor12345
+  UI_SECRET: tempString
   MAX_JOB_WORKERS: 3
   AUTH_MODE: db_auth
   SELF_REGISTRATION: on
@@ -34,8 +34,8 @@ before_install:
    - sudo ./tests/generateCerts.sh
    - sudo ./make/prepare
 
-install: 
-  - sudo apt-get update && sudo apt-get install -y libldap2-dev 
+install:
+  - sudo apt-get update && sudo apt-get install -y libldap2-dev
   - sudo apt-get install -y sqlite3
 #  - sudo apt-get remove -y mysql-common mysql-server-5.5 mysql-server-core-5.5 mysql-client-5.5 mysql-client-core-5.5
 #  - sudo apt-get autoremove -y
@@ -60,7 +60,7 @@ install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
   - IP=`ip addr s eth0 |grep "inet "|awk '{print $2}' |awk -F "/" '{print $1}'`
-  - sudo sed -i '$a DOCKER_OPTS=\"--insecure-registry '$IP':5000\"' /etc/default/docker
+  - sudo sed -i '$a DOCKER_OPTS=\"--insecure-registry '$IP':5000\ --insecure-registry '$IP':80\"' /etc/default/docker
   - sudo service docker restart
   - go get github.com/dghubble/sling
   - go get github.com/stretchr/testify
@@ -68,7 +68,8 @@ install:
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
   - go get github.com/kr/pretty
-  
+  - go get github.com/manveru/faker
+
 before_script:
   # create tables and load data
   # - mysql < ./make/db/registry.sql -uroot --verbose
@@ -81,7 +82,7 @@ script:
   - sudo mkdir -p /harbor
   - sudo mv ./VERSION /harbor/VERSION
   - sudo service mysql stop
-  - sudo ./tests/testprepare.sh 
+  - sudo ./tests/testprepare.sh
   - docker-compose -f ./make/docker-compose.test.yml up -d
   - go list ./... | grep -v -E 'vendor|tests' | xargs -L1 fgt golint
   - go list ./... | grep -v -E 'vendor|tests' | xargs -L1 go vet
@@ -105,6 +106,8 @@ script:
   - ./tests/notarytest.sh
   - ./tests/startuptest.sh
   - ./tests/userlogintest.sh ${HARBOR_ADMIN} ${HARBOR_ADMIN_PASSWD}
+  - cd ./tests/loadgen && go build
+  - ./loadgen -harbor_url http://$IP -users 2 -projects 5 -port 80
 
 #  - sudo ./tests/testprepare.sh
 #  - go test -v ./tests/apitests

@@ -159,6 +159,7 @@ func VerifyData(data DataGen) {
     }
     projects := ListProjects(baseURL, sessionID)
     generatedProjects := data.GetAllProjects()
+
     // Adding 1 for the default project library
     if len(projects) != len(generatedProjects)+1 {
         msg := fmt.Sprintf("Number of projects fetched should be equal. Expected %d Actual %d\n", len(generatedProjects)+1, len(projects))
