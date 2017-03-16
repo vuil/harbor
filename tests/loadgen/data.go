@@ -183,15 +183,16 @@ func VerifyData(data DataGen) {
 
 func main() {
     urlPtr := flag.String("harbor_url", "http://localhost", "Harbor REST endpoint")
-    noOfUsersPtr := flag.Int("users", 10, "Number of users to be created")
-    noOfProjectsPtr := flag.Int("projects", 100, "Number of projects to be created")
+    noOfUsersPtr := flag.Int("users", 5, "Number of users to be created")
+    noOfProjectsPtr := flag.Int("projects", 5, "Number of projects to be created")
+    noOfPushesPtr := flag.Int("images", 5, "Number of images to be pushed")
     portNumberPtr := flag.String("port", "5000", "Port number to access the endpoint, 80/5000")
 
     flag.Parse()
     baseURL = *urlPtr
 
     data := NewDataGen(*noOfUsersPtr)
-    data.GenerateData(*noOfUsersPtr, *noOfProjectsPtr)
+    data.GenerateData(*noOfUsersPtr, *noOfProjectsPtr, *noOfPushesPtr)
 
     PopulateData(*data, baseURL, *portNumberPtr)
     VerifyData(*data)
