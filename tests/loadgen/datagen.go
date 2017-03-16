@@ -135,11 +135,10 @@ func generateImageVersion() ImageVersion {
     }
 }
 
-func generateProjectImage(isPublic int32) ProjectImage {
+func generateProjectImage(isPublic int32, noOfImages int) ProjectImage {
     projectReq := generateProjectReq(isPublic)
-    count := _randInt(1, 5)
-    var imageVersions = make([]ImageVersion, count)
-    for i := 0; i < count; i++ {
+    var imageVersions = make([]ImageVersion, noOfImages)
+    for i := 0; i < noOfImages; i++ {
         imageVersions[i] = generateImageVersion()
     }
     return ProjectImage {
@@ -149,7 +148,7 @@ func generateProjectImage(isPublic int32) ProjectImage {
 }
 
 // GenerateData generates test data to be persisted to Harbor
-func (d DataGen) GenerateData(numberOfUsers, numberOfProjects int) {
+func (d DataGen) GenerateData(numberOfUsers, numberOfProjects, numberOfImages int) {
     for i := 0; i<numberOfUsers; i++ {
         d.Users[i] = generateUser("projectAdmin")
     }
@@ -159,7 +158,7 @@ func (d DataGen) GenerateData(numberOfUsers, numberOfProjects int) {
     for i := 0; i < numberOfProjects; i++ {
         var index = rand.Intn(numberOfUsers)
         // TODO: projects can be public or non-public
-        var project = generateProjectImage(1)
+        var project = generateProjectImage(1, numberOfImages)
         d.addProject2User(d.Users[index].Username, project)
     }
 }
