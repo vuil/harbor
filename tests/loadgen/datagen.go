@@ -76,6 +76,11 @@ func (d DataGen) GetProjects(username string) []ProjectImage {
     return d.UserProjectMapping[username]
 }
 
+// GetImageVersion returns a combination of a dummy docker image name and tag 
+func (d DataGen) GetImageVersion() ImageVersion {
+    return generateImageVersion()
+}
+
 func (d DataGen) addProject2User(username string, project ProjectImage) {
     projects, _ := d.UserProjectMapping[username]
     projects = append(projects, project)

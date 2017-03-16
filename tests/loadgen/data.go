@@ -4,10 +4,12 @@ package main
 import (
         "flag"
         "fmt"
+        "math/rand"
         "os"
         "os/exec"
         "path"
         "strings"
+        "time"
 
         "github.com/vmware/harbor/src/common/models"
 )
@@ -48,7 +50,7 @@ func pushImageToRepo(username, password, endpoint, port, project, image, tag str
     cmd := exec.Command(pushImagePath, username, password, endpoint, port, project, image, tag)
     output, err := cmd.CombinedOutput()
     if err != nil {
-        panic(err)
+        //panic(err)
         s := CToGoString(output[:])
         fmt.Println(s)
         return false
@@ -159,7 +161,6 @@ func VerifyData(data DataGen) {
     }
     projects := ListProjects(baseURL, sessionID)
     generatedProjects := data.GetAllProjects()
-
     // Adding 1 for the default project library
     if len(projects) != len(generatedProjects)+1 {
         msg := fmt.Sprintf("Number of projects fetched should be equal. Expected %d Actual %d\n", len(generatedProjects)+1, len(projects))
@@ -181,6 +182,43 @@ func VerifyData(data DataGen) {
     }
 }
 
+func VerifyUserPushPermissions(baseURL, portNumber string, data DataGen) {
+    sessionID := initialLogin()
+    users := ListUsers(baseURL, sessionID)
+    projects := ListProjects(baseURL, sessionID)
+
+    rand.Seed(time.Now().UTC().UnixNano())
+    projectIndex := rand.Intn(len(projects))
+    userIndex := rand.Intn(len(users))
+    for projects[projectIndex].OwnerID == users[userIndex].UserID {
+        userIndex = rand.Intn(len(users))
+    }
+    user := users[userIndex]
+    imgVersion := data.GetImageVersion()
+
+    url := parseHarborURL(baseURL)
+    defaultPwd := "Harbor12345"
+    fmt.Println("Trying to push image without adequate permissions")
+    imgPushed := pushImageToRepo(user.Username, defaultPwd, url, portNumber, projects[projectIndex].Name, imgVersion.ImageName, imgVersion.TagName)
+    if !imgPushed {
+        fmt.Printf("Image push failed.\nApplying adequate permissions for the user\n")
+        memberReq := MemberReq {
+            Username: user.Username,
+            Roles   : []int{ 2 }, // developer role
+        }
+        // TODO: Check response code for permissions already set (409)
+        roleAdded, _ := AddPermissionsForUser(sessionID, projects[projectIndex].ProjectID, memberReq)
+        if roleAdded {
+            if pushImageToRepo(user.Username, defaultPwd, url, portNumber, projects[projectIndex].Name, imgVersion.ImageName, imgVersion.TagName) {
+                fmt.Printf("Image push successful with user %s added as member to project %s.\n", user.Username, projects[projectIndex].Name)
+            }
+        } else {
+            msg := fmt.Sprintf("Error occured while adding role to user %s.\n", user.Username)
+            exitWithMessage(msg)
+        }
+    }
+}
+
 func main() {
     urlPtr := flag.String("harbor_url", "http://localhost", "Harbor REST endpoint")
     noOfUsersPtr := flag.Int("users", 10, "Number of users to be created")
@@ -191,8 +229,15 @@ func main() {
     baseURL = *urlPtr
 
     data := NewDataGen(*noOfUsersPtr)
+    fmt.Println("Generating data...")
     data.GenerateData(*noOfUsersPtr, *noOfProjectsPtr)
 
+    fmt.Println("Populating data...")
     PopulateData(*data, baseURL, *portNumberPtr)
+
+    fmt.Println("Verifying populated data...")
     VerifyData(*data)
+
+    fmt.Println("Verifying user permissions...")
+    VerifyUserPushPermissions(baseURL, *portNumberPtr, *data)
 }
