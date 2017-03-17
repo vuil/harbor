@@ -9,6 +9,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -26,8 +27,8 @@ var (
 	ErrTokenExpired = errors.New("Token is expired")
 )
 
-// TokenVerifier object to call the Verify
-type TokenVerifier struct {
+// LWTokenVerifier object to call the Verify
+type LWTokenVerifier struct {
 	lightwavePublicCert *Certificates
 }
 
@@ -47,21 +48,26 @@ const (
 )
 
 // NewTokenVerifier creates a TokenVerifier with a lightwave certificate endpoint
-func NewTokenVerifier(lwCertURL string) *TokenVerifier {
+func NewTokenVerifier(lwCertURL string) TokenVerifier {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
 		},
 	}
 
-	tv := &TokenVerifier{
+	tv := &LWTokenVerifier{
 		lightwavePublicCert: &Certificates{URL: lwCertURL, Transport: tr},
 	}
 	return tv
 }
 
+// GetLightwaveCertURL returns the URL used to retrieve the Lightwave certs
+func GetLightwaveCertURL(endpoint string, domain string) string {
+	return endpoint + fmt.Sprintf("/idm/tenant/%s/certificates/?scope=TENANT", domain)
+}
+
 // Verify verify the token and also return the parsed result
-func (t *TokenVerifier) Verify(token string) (*JWTToken, error) {
+func (t *LWTokenVerifier) Verify(token string) (*JWTToken, error) {
 	rawToken, err := t.lightwavePublicCert.validateToken(token)
 	if err != nil {
 		log.Println(err)

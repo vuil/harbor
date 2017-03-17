@@ -71,7 +71,7 @@ func TestJwttokenVerificationWithCertExpiredTokenFailed(t *testing.T) {
 	token, err := getTokenFromFile("tokens/valid_expired_token")
 	assert.Nil(t, err)
 
-	tokenVerifier := &TokenVerifier{
+	tokenVerifier := &LWTokenVerifier{
 		lightwavePublicCert: &Certificates{
 			URL:       "https://lwserver/idm/tenant/vsphere.local/certificates/?scope=TENANT",
 			Transport: nil},
