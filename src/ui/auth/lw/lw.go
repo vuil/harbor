@@ -34,17 +34,63 @@ import (
 )
 
 // Auth implements Authenticator interface to authenticate against LDAP
-type Auth struct{}
+type Auth struct {
+	initialized   bool
+	tokenVerifier tokenverifier.TokenVerifier
+	lwClient      oidc.Client
+	lwDomainName  string
+}
+
+// GroupRole a user's role in a group
+type GroupRole struct {
+	groupName string
+	role      string
+}
 
 const (
 	// GroupPrefix is the prefix to all LW group names that harbor recognizes
 	GroupPrefix string = "Harbor_Project"
 )
 
-// GroupRole a user's role in a group
-type GroupRole struct {
-	groupName string
-	role      string
+var lwAuth Auth
+
+func (l *Auth) initialize() {
+	lwSetting, err := lwUtils.GetSystemLwConf()
+	if err != nil {
+		log.Error("Error loading Lightwave configuration")
+		panic(err)
+	}
+	client := GetOIDCClient()
+	certURL := tokenverifier.GetLightwaveCertURL(lwSetting.Endpoint, lwSetting.DomainName)
+	tv := tokenverifier.NewTokenVerifier(certURL)
+	l.lwClient = client
+	l.tokenVerifier = tv
+	l.lwDomainName = lwSetting.DomainName
+	l.initialized = true
+}
+
+// GetVerifier returns the token verifier
+func (l *Auth) GetVerifier() tokenverifier.TokenVerifier {
+	if !l.initialized {
+		l.initialize()
+	}
+	return l.tokenVerifier
+}
+
+// GetLWClient returns the oidc client
+func (l *Auth) GetLWClient() oidc.Client {
+	if !l.initialized {
+		l.initialize()
+	}
+	return l.lwClient
+}
+
+// GetLWDomainName returns the domain name
+func (l *Auth) GetLWDomainName() string {
+	if !l.initialized {
+		l.initialize()
+	}
+	return l.lwDomainName
 }
 
 // GetLWOptions returns the config options for connecting with lightwave
@@ -90,9 +136,9 @@ func getGroupRoles(jwtToken *tokenverifier.JWTToken) (result []GroupRole) {
 }
 
 // getProjectRolesFromToken returns the map of a user's projects to user's role in them
-func getUserProjectsFromToken(lwSetting models.LightwaveSetting, tokenVerifier tokenverifier.TokenVerifier, token oidc.TokenResponse) (groupRoles []GroupRole) {
+func (l *Auth) getUserProjectsFromToken(token oidc.TokenResponse) (groupRoles []GroupRole) {
 	time.Sleep(1 * time.Second)
-	jwtToken, error := tokenVerifier.Verify(token.GetAccessToken())
+	jwtToken, error := l.GetVerifier().Verify(token.GetAccessToken())
 	log.Debugf("========== JWT Error = %+v\n Token = %+v\n", error, jwtToken)
 	if error == nil {
 		groupRoles = getGroupRoles(jwtToken)
@@ -106,22 +152,17 @@ func getUserProjectsFromToken(lwSetting models.LightwaveSetting, tokenVerifier t
 // created. Creating of the projects is sometimes necessary if the user
 // authenticated via Lightwave is already preassigned memberships to lightwave
 // groups that map to Harbor projects
-func ensureUserProjects(lwSetting models.LightwaveSetting, user models.User, token oidc.TokenResponse) {
-	certURL := tokenverifier.GetLightwaveCertURL(lwSetting.Endpoint, lwSetting.DomainName)
-	tv := tokenverifier.NewTokenVerifier(certURL)
-	getUserProjectsFromToken(lwSetting, tv, token)
-
+func (l *Auth) ensureUserProjects(user models.User, token oidc.TokenResponse) {
+	l.getUserProjectsFromToken(token)
 	// TODO create projects if necessary
 }
 
 // Login username : user name without the @<lw_domainName>
-func Login(client oidc.Client, lwSetting models.LightwaveSetting, username string, password string) (oidc.TokenResponse, oidc.ErrorResponse) {
+func (l *Auth) Login(username string, password string) (oidc.TokenResponse, oidc.ErrorResponse) {
 	log.Debug("lw login for ", username)
 
-	domainName := lwSetting.DomainName
-
-	userName := username + "@" + domainName
-	token, errorResponse := client.GetTokenByPasswordGrant(userName, password)
+	userName := username + "@" + l.GetLWDomainName()
+	token, errorResponse := l.GetLWClient().GetTokenByPasswordGrant(userName, password)
 	if errorResponse != nil {
 		log.Info(fmt.Sprintf("GetTokenByPasswordGrant, User: %s, ErrorResponse: %d, %s", username,
 			errorResponse.GetStatusCode(), errorResponse.GetFullMessage()))
@@ -137,14 +178,7 @@ func (l *Auth) Authenticate(m models.AuthModel) (*models.User, error) {
 	pass := m.Password
 	u := models.User{}
 
-	client := GetOIDCClient()
-	lwSetting, err := lwUtils.GetSystemLwConf()
-	if err != nil {
-		log.Error("Error loading Lightwave configuration")
-		panic(err)
-	}
-
-	token, errResponse := Login(client, lwSetting, user, pass)
+	token, errResponse := l.Login(user, pass)
 	if errResponse != nil {
 		return nil, errors.New(errResponse.GetFullMessage())
 	}
@@ -163,7 +197,7 @@ func (l *Auth) Authenticate(m models.AuthModel) (*models.User, error) {
 			return nil, err
 		}
 		u.UserID = currentUser.UserID
-		ensureUserProjects(lwSetting, u, token)
+		l.ensureUserProjects(u, token)
 	} else {
 		u.Realname = m.Principal
 		u.Password = "12345678Lw"
@@ -176,11 +210,14 @@ func (l *Auth) Authenticate(m models.AuthModel) (*models.User, error) {
 			return nil, err
 		}
 		u.UserID = int(userID)
-		ensureUserProjects(lwSetting, u, token)
+		l.ensureUserProjects(u, token)
 	}
 	return &u, nil
 }
 
 func init() {
-	auth.Register("lw_auth", &Auth{})
+	// ui/config state is not guaranteed to be initialized at this point, so
+	// postpone the set up of the Auth struct to later.
+	lwAuth = Auth{}
+	auth.Register("lw_auth", &lwAuth)
 }
