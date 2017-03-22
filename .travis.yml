@@ -71,6 +71,7 @@ install:
   - go get github.com/manveru/faker
   - go get github.com/golang/mock/gomock
   - go get github.com/golang/mock/mockgen
+  - go get github.com/codeskyblue/go-sh
 
 before_script:
   # create tables and load data
@@ -105,6 +106,8 @@ script:
   - sudo rm -rf /data/database
   - sudo rm -rf /data/registry
   - sudo rm -rf /data/config/* 
+
+  - ./tests/it-test-prepare
   - ls /data/cert
   - sudo make install GOBUILDIMAGE=golang:1.7.3 COMPILETAG=compile_golangimage CLARITYIMAGE=danieljt/harbor-clarity-base:0.8.4 NOTARYFLAG=true
   
@@ -112,8 +115,9 @@ script:
   - ./tests/notarytest.sh
   - ./tests/startuptest.sh
   - ./tests/userlogintest.sh ${HARBOR_ADMIN} ${HARBOR_ADMIN_PASSWD}
-  - cd ./tests/loadgen && go build
-  - ./loadgen -harbor_url http://$IP -users 2 -projects 5 -port 80
+  - export HARBOR_INSTANCE=http://$IP
+  - export REGISTRY_PORT=80
+  - cd tests/lw-tests && go test -short
 
 #  - sudo ./tests/testprepare.sh
 #  - go test -v ./tests/apitests
