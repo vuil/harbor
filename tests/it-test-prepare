@@ -1,0 +1,52 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+from __future__ import print_function, unicode_literals # We require Python 2.6 or later
+from string import Template
+import random
+import string
+import os
+import sys
+import argparse
+import subprocess
+import shutil
+from io import open
+
+if sys.version_info[:3][0] == 2:
+    import ConfigParser as ConfigParser
+    import StringIO as StringIO
+
+if sys.version_info[:3][0] == 3:
+    import configparser as ConfigParser
+    import io as StringIO
+
+curr_dir = os.path.dirname(__file__)
+parent_dir = os.path.abspath(os.path.join(curr_dir, os.pardir))
+config_file_dir = os.path.join(parent_dir, "make")
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-conf', dest='cfgfile', default=config_file_dir+'/harbor.cfg',type=str,help="the path of Harbor configuration file")
+
+args = parser.parse_args()
+
+def render(newFile, pairs):
+    with open(newFile, "w") as file :
+        for key,value in pairs:
+            file.write("%s = %s\n" % (key,value))
+
+#Read configurations
+conf = StringIO.StringIO()
+conf.write("[dummy]\n")
+conf.write(open(args.cfgfile).read())
+conf.seek(0, os.SEEK_SET)
+rcp = ConfigParser.RawConfigParser()
+rcp.readfp(conf)
+
+rcp.set("dummy", "auth_mode", "lw_auth")
+rcp.set("dummy", "lw_domainname", os.environ['LW_DOMAINNAME'])
+rcp.set("dummy", "lw_endpoint", os.environ['LW_ENDPOINT'])
+# Unused variables for now
+rcp.set("dummy", "lw_admin_user", "")
+rcp.set("dummy", "lw_admin_password", "")
+
+pairs = rcp.items("dummy")
+render(args.cfgfile, pairs)
