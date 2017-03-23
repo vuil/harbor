@@ -12,7 +12,6 @@ type Search struct {
 
 // SearchProject maps search result JSON to object
 type SearchProject struct {
-
 	ID int64 `json:"id,omitempty"`
 
 	Name string `json:"name,omitempty"`
@@ -22,7 +21,6 @@ type SearchProject struct {
 
 // SearchRepository maps search result JSON to object
 type SearchRepository struct {
-
 	ProjectID int32 `json:"project_id,omitempty"`
 
 	ProjectName string `json:"project_name,omitempty"`
@@ -40,4 +38,13 @@ type ProjectReq struct {
 
 	// The public status of the project.
 	Public int32 `json:"public,omitempty"`
+}
+
+type MemberReq struct {
+
+	// The username of the user to be added as member
+	Username string `json:"username"`
+
+	// The role ids of the roles to be given to the member
+	Roles []int `json:"roles"`
 }
