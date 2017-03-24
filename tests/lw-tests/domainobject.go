@@ -40,6 +40,7 @@ type ProjectReq struct {
 	Public int32 `json:"public,omitempty"`
 }
 
+// MemberReq contains parameters for adding roles to a user
 type MemberReq struct {
 
 	// The username of the user to be added as member

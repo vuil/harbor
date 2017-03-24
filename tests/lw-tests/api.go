@@ -153,6 +153,7 @@ func ListProjects(baseURL, sessionID, projectName string) []models.Project {
 	return *projects
 }
 
+// ListRepos fetches the list of repos for a project
 func ListRepos(baseURL, sessionID string, projectID int64) []string {
 	var queryParams = map[string]string{
 		"project_id": strconv.FormatInt(projectID, 10),
@@ -198,7 +199,8 @@ func SearchForProjects(baseURL, sessionID string, searchKey string) []Search {
 	return *searchedProjects
 }
 
-func AddPermissionsForUser(baseURL, sessionID string, projectId int64, memberReq MemberReq) (bool, int) {
+// AddPermissionsForUser provides permissions to a user
+func AddPermissionsForUser(baseURL, sessionID string, projectID int64, memberReq MemberReq) (bool, int) {
 	var permissionAdded = false
 	cookie := http.Cookie{Name: "beegosessionID", Value: sessionID}
 	jsonData, err := json.Marshal(memberReq)
@@ -209,7 +211,7 @@ func AddPermissionsForUser(baseURL, sessionID string, projectId int64, memberReq
 	// Append priject ID to URL
 	buf := new(bytes.Buffer)
 	buf.WriteString("/api/projects/")
-	buf.WriteString(strconv.FormatInt(projectId, 10))
+	buf.WriteString(strconv.FormatInt(projectID, 10))
 	buf.WriteString("/members/")
 
 	resp := postJSON(baseURL, buf.String(), jsonData, cookie)

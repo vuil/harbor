@@ -25,28 +25,27 @@ func NewLwHarborInstance(baseURL string, port int) *LwHarborInstance {
 }
 
 // Login method logs in the user
-func (self *LwHarborInstance) Login(user LWUserInfo) (string, bool) {
-	resp, err := Login(self.BaseURL, user.Username, user.Password)
+func (instance *LwHarborInstance) Login(user LWUserInfo) (string, bool) {
+	resp, err := Login(instance.BaseURL, user.Username, user.Password)
 	statusCode := resp.StatusCode
 	if err != nil {
-		fmt.Errorf("Error while logging in with credentials %s/%s", user.Username, user.Password)
+		fmt.Printf("Error while logging in with credentials %s/%s", user.Username, user.Password)
 		return "", false
-	} else {
-		if statusCode != 200 {
-			fmt.Errorf("Error while logging in with credentials %s/%s", user.Username, user.Password)
-			return "", false
-		} else {
-			sessionID := resp.Cookies()[0].Value
-			return sessionID, true
-		}
+	} 
+	if statusCode != 200 {
+		fmt.Printf("Error while logging in with credentials %s/%s", user.Username, user.Password)
+		return "", false
+	} 
+	sessionID := resp.Cookies()[0].Value
+	return sessionID, true
 	}
 }
 
 // CreateProject creates a Project entry in the Harbor db
-func (self *LwHarborInstance) CreateProject(user LWUserInfo, project ProjectReq) bool {
-	sessionID, isLoggedIn := self.Login(user)
+func (instance *LwHarborInstance) CreateProject(user LWUserInfo, project ProjectReq) bool {
+	sessionID, isLoggedIn := instance.Login(user)
 	if isLoggedIn {
-		created, respCode := CreateProject(self.BaseURL, sessionID, project)
+		created, respCode := CreateProject(instance.BaseURL, sessionID, project)
 		if !created {
 			if respCode == 409 {
 				fmt.Printf("Project named %s already exists. Could not recreate project\n", project.ProjectName)
@@ -60,20 +59,20 @@ func (self *LwHarborInstance) CreateProject(user LWUserInfo, project ProjectReq)
 }
 
 // PushImage pushes an image to the repository
-func (self *LwHarborInstance) PushImage(user LWUserInfo, project, image, tag string) bool {
-	endpoint := parseHarborURL(self.BaseURL)
-	return pushImage(user.Username, user.Password, endpoint, strconv.Itoa(self.RegistryPort), project, image, tag)
+func (instance *LwHarborInstance) PushImage(user LWUserInfo, project, image, tag string) bool {
+	endpoint := parseHarborURL(instance.BaseURL)
+	return pushImage(user.Username, user.Password, endpoint, strconv.Itoa(instance.RegistryPort), project, image, tag)
 }
 
-func (self *LwHarborInstance) AddPermissions(user LWUserInfo, project string) bool {
-	sessionID, loggedIn := self.Login(LWUserInfo{"admin", "Harbor12345"})
+func (instance *LwHarborInstance) AddPermissions(user LWUserInfo, project string) bool {
+	sessionID, loggedIn := instance.Login(LWUserInfo{"admin", "Harbor12345"})
 	if !loggedIn {
 		fmt.Println("Login with admin user failed")
 		return false
 	}
-	projects := self.GetProjects(project)
+	projects := instance.GetProjects(project)
 	// TODO: Handle error response codes
-	addedPerms, _ := AddPermissionsForUser(self.BaseURL, sessionID, projects[0].ProjectID, MemberReq{
+	addedPerms, _ := AddPermissionsForUser(instance.BaseURL, sessionID, projects[0].ProjectID, MemberReq{
 		Username: user.Username,
 		Roles:    []int{2}, // developer role
 	})
@@ -83,13 +82,13 @@ func (self *LwHarborInstance) AddPermissions(user LWUserInfo, project string) bo
 	return addedPerms
 }
 
-func (self *LwHarborInstance) GetProjects(projectName string) []models.Project {
-	sessionID, loggedIn := self.Login(LWUserInfo{"admin", "Harbor12345"})
+func (instance *LwHarborInstance) GetProjects(projectName string) []models.Project {
+	sessionID, loggedIn := instance.Login(LWUserInfo{"admin", "Harbor12345"})
 	if !loggedIn {
 		fmt.Println("Login with admin user failed")
 		return []models.Project{}
 	}
-	return ListProjects(self.BaseURL, sessionID, projectName)
+	return ListProjects(instance.BaseURL, sessionID, projectName)
 }
 
 func pushImage(username, password, endpoint, port, project, image, tag string) bool {
