@@ -109,7 +109,8 @@ script:
 
   - ./tests/it-test-prepare
   - ls /data/cert
-  - sudo make install GOBUILDIMAGE=golang:1.7.3 COMPILETAG=compile_golangimage CLARITYIMAGE=danieljt/harbor-clarity-base:0.8.4 NOTARYFLAG=true
+  # Setting NOTARYFLAG to false
+  - sudo make install GOBUILDIMAGE=golang:1.7.3 COMPILETAG=compile_golangimage CLARITYIMAGE=danieljt/harbor-clarity-base:0.8.4 NOTARYFLAG=false
   
   - docker ps
   - ./tests/notarytest.sh
