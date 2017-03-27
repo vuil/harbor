@@ -118,6 +118,11 @@ func generateProjectImage(isPublic int32, noOfImages int) ProjectImage {
     }
 }
 
+// GetImageVersion returns a combination of a dummy docker image name and tag
+func (d *DataGen) GetImageVersion() ImageVersion {
+    return generateImageVersion()
+}
+
 // GenerateData generates test data to be persisted to Harbor
 // Generates projects and images against Lightwave users
 func (d *DataGen) GenerateProjectData(users []LWUserInfo, numberOfProjects, numberOfImages int) {
