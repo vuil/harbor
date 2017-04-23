@@ -57,6 +57,7 @@ def get_secret_key(path):
 base_dir = os.path.dirname(__file__)
 config_dir = os.path.join(base_dir, "common/config")
 templates_dir = os.path.join(base_dir, "common/templates")
+dev_dcompose_dir = os.path.join(base_dir, "dev")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-conf', dest='cfgfile', default=base_dir+'/harbor.cfg',type=str,help="the path of Harbor configuration file")
@@ -104,6 +105,7 @@ ldap_scope = rcp.get("configuration", "ldap_scope")
 ldap_connect_timeout = rcp.get("configuration", "ldap_connect_timeout")
 lw_domainname = rcp.get("configuration", "lw_domainname")
 lw_endpoint = rcp.get("configuration", "lw_endpoint")
+lw_endpoint_ip = rcp.get("configuration", "lw_endpoint_ip")
 lw_admin_user = rcp.get("configuration", "lw_admin_user")
 lw_admin_password = rcp.get("configuration", "lw_admin_password")
 lw_ignore_certificates = rcp.get("configuration", "lw_ignore_certificates")
@@ -168,6 +170,10 @@ db_conf_env = os.path.join(config_dir, "db", "env")
 job_conf_env = os.path.join(config_dir, "jobservice", "env")
 nginx_conf = os.path.join(config_dir, "nginx", "nginx.conf")
 cert_dir = os.path.join(config_dir, "nginx", "cert")
+
+# Default .env file for dev/docker-compose.yml
+dev_dcompose_env = os.path.join(dev_dcompose_dir, ".env")
+
 def delfile(src):
     if os.path.isfile(src):
         try:
@@ -254,6 +260,11 @@ render(os.path.join(templates_dir, "jobservice", "env"),
         secret_key=secret_key,
         ui_url=ui_url,
         verify_remote_cert=verify_remote_cert)
+
+render(os.path.join(templates_dir, "ui", "hosts"),
+        dev_dcompose_env,
+        lw_endpoint_ip=lw_endpoint_ip,
+        lw_endpoint_domain=(lw_endpoint.strip("https://") if "https://" in lw_endpoint else lw_endpoint.strip("http://"))
 
 print("Generated configuration file: %s" % jobservice_conf)
 shutil.copyfile(os.path.join(templates_dir, "jobservice", "app.conf"), jobservice_conf)
